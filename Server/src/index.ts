@@ -5,7 +5,9 @@ import http from 'http';
 import connectDB from './db/db';
 import dotenv from 'dotenv';
 import DocumentRouter from './Routes/doc';
-// Load environment variables
+import Document from './Models/Document';
+import { socketHandler } from './Routes/socket';
+
 dotenv.config();
 
 // Connect to MongoDB
@@ -29,32 +31,7 @@ const io = new Server(HttpServer, {
   },
 });
 
-// Socket.IO logic
-io.on('connection', (socket) => {
-  console.log(`✅ Socket connected: ${socket.id}`);
-
-  // Handle join document event
-  socket.on('JOIN_DOCUMENT', ({ docId, userId }) => {
-    console.log(`User ${userId} joined doc ${docId}`);
-    socket.join(`doc:${docId}`);
-
-    // Broadcast to everyone in the room except the sender
-    socket.to(`doc:${docId}`).emit("USER_JOINED", {
-      userId,
-      message: `👋 User ${userId} has joined the document.`,
-    });
-  });
-
-  // Handle document content updates
-  socket.on('UPDATE_DOC_CONTENT', ({ docId, content }) => {
-    socket.to(`doc:${docId}`).emit('DOC_UPDATED', content);
-  });
-
-  // Optional: handle disconnects
-  socket.on("disconnect", () => {
-    console.log(`❌ Socket disconnected: ${socket.id}`);
-  });
-});
+socketHandler(io);
 
 app.use('/api', DocumentRouter);
 // Test route
