@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import DocumentRouter from './Routes/doc';
 import Document from './Models/Document';
 import { socketHandler } from './Routes/socket';
-
+import UserRoutes from './Routes/user';
 dotenv.config();
 
 // Connect to MongoDB
@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 const HttpServer = http.createServer(app);
 
 // Enable JSON parsing
-app.use(express.json());
+
 
 
 // Initialize Socket.IO with CORS enabled
@@ -32,8 +32,12 @@ const io = new Server(HttpServer, {
 });
 
 socketHandler(io);
+app.use(express.json());
+
 
 app.use('/api', DocumentRouter);
+app.use('/user', UserRoutes);
+
 // Test route
 app.get('/', (_req, res) => {
   res.send('Hello from Express + TypeScript + WebSocket');
